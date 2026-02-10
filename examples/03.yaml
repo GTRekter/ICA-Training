@@ -1,0 +1,71 @@
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: simple-app-gateway
+  namespace: simple-app
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 443
+      name: tls
+      protocol: TLS
+    tls:
+      mode: PASSTHROUGH
+    hosts:
+    - v1.smihost.127.0.0.1.sslip.io
+    - v2.smihost.127.0.0.1.sslip.io
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: simple-app
+  namespace: simple-app
+spec:
+  hosts:
+  - v1.smihost.127.0.0.1.sslip.io
+  - v2.smihost.127.0.0.1.sslip.io
+  gateways:
+  - simple-app-gateway
+  tls:
+  - match:
+    - port: 443
+      sniHosts:
+      - v1.smihost.127.0.0.1.sslip.io
+    route:
+    - destination:
+        host: simple-app-v1-tls.simple-app.svc.cluster.local
+        port:
+          number: 80
+  - match:
+    - port: 443
+      sniHosts:
+      - v2.smihost.127.0.0.1.sslip.io
+    route:
+    - destination:
+        host: simple-app-v2-tls.simple-app.svc.cluster.local
+        port:
+          number: 80
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: simple-app-v1
+  namespace: simple-app
+spec:
+  host: simple-app-v1-tls.simple-app.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE # it makes the gateway send plain TCP to the pod.
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: simple-app-v2
+  namespace: simple-app
+spec:
+  host: simple-app-v2-tls.simple-app.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE # it makes the gateway send plain TCP to the pod.

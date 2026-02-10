@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: simple-app-v3-http
+  namespace: simple-app
+spec:
+  selector:
+    app: simple-app
+    version: v3
+    protocol: http
+  ports:
+    - port: 80
+      targetPort: 5678

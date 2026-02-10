@@ -1,0 +1,59 @@
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: simple-app-gateway
+  namespace: simple-app
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port: 
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - simple-app.127.0.0.1.sslip.io
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: simple-app
+  namespace: simple-app
+spec:
+  hosts:
+  - simple-app.127.0.0.1.sslip.io
+  gateways:
+  - simple-app-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /v1/
+    retries:
+      attempts: 3
+      perTryTimeout: 1s
+      retryOn: gateway-error,connect-failure,refused-stream
+    route:
+    - destination:
+        host: simple-app-v1-http.simple-app.svc.cluster.local
+        port:
+          number: 80
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: simple-app-v1-fault
+  namespace: simple-app
+spec:
+  hosts:
+  - simple-app-v1-http.simple-app.svc.cluster.local
+  http:
+  - fault:
+      abort:
+        httpStatus: 503
+        percentage:
+          value: 50
+    route:
+    - destination:
+        host: simple-app-v1-http.simple-app.svc.cluster.local
+        port:
+          number: 80

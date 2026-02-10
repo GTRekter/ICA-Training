@@ -1,0 +1,34 @@
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: simple-app-gateway
+  namespace: simple-app
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 443
+      name: tcp
+      protocol: TCP
+    hosts:
+    - simple-app.127.0.0.1.sslip.io
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: simple-app
+  namespace: simple-app
+spec:
+  hosts:
+  - simple-app.127.0.0.1.sslip.io
+  gateways:
+  - simple-app-gateway
+  tcp:
+  - match:
+    - port: 443
+    route:
+    - destination:
+        host: simple-app-v1-tcp.simple-app.svc.cluster.local
+        port:
+          number: 80

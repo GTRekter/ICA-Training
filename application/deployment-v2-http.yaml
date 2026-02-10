@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-app-v2-http
+  namespace: simple-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simple-app
+      version: v2
+      protocol: http
+  template:
+    metadata:
+      labels:
+        app: simple-app
+        version: v2
+        protocol: http
+    spec:
+      containers:
+        - name: http-app
+          image: hashicorp/http-echo:latest
+          args:
+            - "-text=Simple App v2"
+          ports:
+            - containerPort: 5678

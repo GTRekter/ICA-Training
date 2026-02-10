@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - deployment-v1-http.yaml
+  - deployment-v1-tcp.yaml
+  - deployment-v1-tls.yaml
+  - deployment-v2-http.yaml
+  - deployment-v2-tcp.yaml
+  - deployment-v2-tls.yaml
+  - deployment-v3-http.yaml
+  - service-v1-http.yaml
+  - service-v1-tcp.yaml
+  - service-v1-tls.yaml
+  - service-v2-http.yaml
+  - service-v2-tcp.yaml
+  - service-v2-tls.yaml
+  - service-v3-http.yaml
+# namespace: simple-app

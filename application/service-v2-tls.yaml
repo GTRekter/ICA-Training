@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: simple-app-v2-tls
+  namespace: simple-app
+spec:
+  selector:
+    app: simple-app
+    version: v2
+    protocol: tls
+  ports:
+    - port: 80
+      targetPort: 5678

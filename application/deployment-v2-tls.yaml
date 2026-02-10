@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-app-v2-tls
+  namespace: simple-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simple-app
+      version: v2
+      protocol: tls
+  template:
+    metadata:
+      labels:
+        app: simple-app
+        version: v2
+        protocol: tls
+    spec:
+      containers:
+        - name: tls-echo
+          image: alpine:3.19
+          command:
+            - /bin/sh
+            - -c
+            - |
+              apk add --no-cache openssl socat && \
+              openssl req -x509 -newkey rsa:2048 -keyout /tmp/key.pem -out /tmp/cert.pem -days 365 -nodes -subj '/CN=localhost' && \
+              while true; do \
+                socat -v openssl-listen:5678,reuseaddr,fork,cert=/tmp/cert.pem,key=/tmp/key.pem,verify=0 system:'echo Simple App v2'; \
+              done
+          ports:
+            - containerPort: 5678

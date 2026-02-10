@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-app-v2-tcp
+  namespace: simple-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simple-app
+      version: v2
+      protocol: tcp
+  template:
+    metadata:
+      labels:
+        app: simple-app
+        version: v2
+        protocol: tcp
+    spec:
+      containers:
+        - name: tcp-echo
+          image: alpine/socat:1.8.0.0
+          command:
+            - /bin/sh
+            - -c
+            - |
+              while true; do \
+                socat -v tcp-l:5678,reuseaddr,fork system:'echo Simple App v2'; \
+              done
+          ports:
+            - containerPort: 5678
