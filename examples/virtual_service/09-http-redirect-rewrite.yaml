@@ -27,31 +27,9 @@ spec:
   http:
   - match:
     - uri:
-        prefix: /v1/
-    retries:
-      attempts: 3
-      perTryTimeout: 1s
-      retryOn: gateway-error,connect-failure,refused-stream
-    route:
-    - destination:
-        host: simple-app-v1-http.simple-app.svc.cluster.local
-        port:
-          number: 80
----
-apiVersion: networking.istio.io/v1
-kind: VirtualService
-metadata:
-  name: simple-app-v1-fault
-  namespace: simple-app
-spec:
-  hosts:
-  - simple-app-v1-http.simple-app.svc.cluster.local
-  http:
-  - fault:
-      abort:
-        httpStatus: 503
-        percentage:
-          value: 50
+        prefix: /
+    rewrite:
+      uri: /v1
     route:
     - destination:
         host: simple-app-v1-http.simple-app.svc.cluster.local

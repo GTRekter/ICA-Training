@@ -1,0 +1,53 @@
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: simple-app-gateway
+  namespace: simple-app
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port: 
+      number: 80
+      name: http-80
+      protocol: HTTP
+    hosts:
+    - simple-app.127.0.0.1.sslip.io
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: simple-app
+  namespace: simple-app
+spec:
+  hosts:
+  - simple-app.127.0.0.1.sslip.io
+  gateways:
+  - simple-app-gateway
+  http:
+  - route:
+    - destination:
+        host: simple-app-v1-http.simple-app.svc.cluster.local
+        port:
+          number: 80
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: simple-app
+  namespace: simple-app
+spec:
+  host: simple-app-v1-http.simple-app.svc.cluster.local
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 2
+        connectTimeout: 1s
+        tcpKeepalive: 
+          time: 30s
+          interval: 30s
+      http:
+        h2UpgradePolicy: DO_NOT_UPGRADE
+        http1MaxPendingRequests: 1
+        http2MaxRequests: 2
+        maxRequestsPerConnection: 1

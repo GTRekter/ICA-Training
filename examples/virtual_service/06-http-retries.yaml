@@ -7,10 +7,10 @@ spec:
   selector:
     istio: ingressgateway
   servers:
-  - port:
-      number: 443
-      name: tcp
-      protocol: TCP
+  - port: 
+      number: 80
+      name: http
+      protocol: HTTP
     hosts:
     - simple-app.127.0.0.1.sslip.io
 ---
@@ -24,11 +24,16 @@ spec:
   - simple-app.127.0.0.1.sslip.io
   gateways:
   - simple-app-gateway
-  tcp:
+  http:
   - match:
-    - port: 443
+    - uri:
+        prefix: /v1/
+    retries:
+      attempts: 3
+      perTryTimeout: 1s
+      retryOn: gateway-error,connect-failure,refused-stream
     route:
     - destination:
-        host: simple-app-v1-tcp.simple-app.svc.cluster.local
+        host: simple-app-v4-http.simple-app.svc.cluster.local
         port:
           number: 80
